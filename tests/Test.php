@@ -1,4 +1,6 @@
 <?php
+use Shopware\DsnFrontendBlocks\Components\BlockAnnotator;
+use Shopware\DsnFrontendBlocks\Components\BlockSplitter;
 
 /**
  * @backupGlobals disabled
@@ -26,9 +28,25 @@ class PluginTest extends Shopware\Components\Test\Plugin\TestCase
 {block name="test5"}5{/block}
 EOF;
 
-    public function testBlockParser()
+    protected $templateResult = <<<'EOF'
+{block name=test}<!-- BLOCK BEGIN test --><!-- BLOCK END test -->{/block}
+
+{block name='test2'}<!-- BLOCK BEGIN test2 -->
+    2
+    {block name='test3'}<!-- BLOCK BEGIN test3 -->
+        3
+        {block name='test4'}<!-- BLOCK BEGIN test4 -->
+            4
+        <!-- BLOCK END test4 -->{/block}
+    <!-- BLOCK END test3 -->{/block}
+<!-- BLOCK END test2 -->{/block}
+
+{block name="test5"}<!-- BLOCK BEGIN test5 -->5<!-- BLOCK END test5 -->{/block}
+EOF;
+
+    public function testBlockSplitter()
     {
-        $parser = new \Shopware\DsnFrontendBlocks\Components\BlockSplitter();
+        $parser = new BlockSplitter();
         $result = $parser->split($this->template);
 
         foreach (array('test2', 'test3', 'test5', 'test4', 'test') as $key => $value) {
@@ -38,9 +56,11 @@ EOF;
 
     public function testAnnotator()
     {
-        $annotator = new \Shopware\DsnFrontendBlocks\Components\BlockAnnotator();
+        $annotator = new BlockAnnotator(
+            new BlockSplitter()
+        );
         $template = $annotator->annotate($this->template, 'test');
-        
+        $this->assertEquals($this->templateResult, $template);
     }
 
 }

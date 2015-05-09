@@ -7,17 +7,25 @@ use Shopware\DsnFrontendBlocks\Components\BlockSplitter;
 
 class Frontend implements \Enlight\Event\SubscriberInterface
 {
+    /**
+     * @var BlockAnnotator
+     */
     protected $annotator;
 
     public static function getSubscribedEvents()
     {
         return array(
-            'Enlight_Controller_Action_PreDispatch_Frontend' => 'onFrontendPostDispatch',
-            'Enlight_Controller_Action_PreDispatch_Widgets' => 'onFrontendPostDispatch',
+            'Enlight_Controller_Action_PreDispatch_Frontend' => 'onPreDispatch',
+            'Enlight_Controller_Action_PreDispatch_Widgets' => 'onPreDispatch',
         );
     }
 
-    public function onFrontendPostDispatch(\Enlight_Event_EventArgs $args)
+    /**
+     * PreDispatch callback for widget and frontend requests
+     *
+     * @param \Enlight_Event_EventArgs $args
+     */
+    public function onPreDispatch(\Enlight_Event_EventArgs $args)
     {
         /** @var $controller \Enlight_Controller_Action */
         $controller = $args->getSubject();
@@ -38,15 +46,24 @@ class Frontend implements \Enlight\Event\SubscriberInterface
         $view->Engine()->registerFilter('pre', array($this, 'preFilter'));
     }
 
-    public function preFilter($source, \Smarty $template)
+    /**
+     * Smarty preFilter callback. Modify template and return
+     *
+     * @param $source
+     * @param $template
+     * @return mixed
+     */
+    public function preFilter($source, $template)
     {
         return $this->annotator->annotate($source);
     }
 
     /**
+     * Set own template directory
+     *
      * @param $templateManager
      */
-    private function reconfigureTemplateDirs($templateManager)
+    private function reconfigureTemplateDirs(\Enlight_Template_Manager $templateManager)
     {
         $compileDir = $templateManager->getCompileDir() . 'blocks/';
         $cacheDir = $templateManager->getTemplateDir() . 'blocks/';

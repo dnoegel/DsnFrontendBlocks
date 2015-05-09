@@ -55,6 +55,7 @@ class BlockAnnotator
 
     public function annotate($template)
     {
+
         foreach ($this->blockSplitter->split($template) as $block) {
 
             if (in_array($block['name'], $this->blacklist)) {
