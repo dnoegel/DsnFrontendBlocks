@@ -22,10 +22,10 @@ class BlockSplitter
     public function split($template)
     {
         $matches = array();
-        preg_match_all('#'. self::BLOCK_START. '|' . self::BLOCK_END . '#', $template, $matches, PREG_OFFSET_CAPTURE);
+        preg_match_all('#' . self::BLOCK_START . '|' . self::BLOCK_END . '#', $template, $matches, PREG_OFFSET_CAPTURE);
 
-        $open = array();
-        $result = array();
+        $openStack = array();
+        $closedStack = array();
 
         // Iterate all matches and build the result array
         foreach ($matches[0] as $key => $match) {
@@ -36,39 +36,54 @@ class BlockSplitter
 
             if ($isStart) {
                 // iterate all currently open blocks and increase the child counter
-                foreach ($open as &$parentElement) {
+                foreach ($openStack as &$parentElement) {
                     $parentElement['children'] += 1;
                 }
                 // push the open block to the stack
-                $open[] = array('name' => $name, 'start' => $offset, 'startContent' => $offset + strlen($value), 'children' => 0);
+                $openStack[] = array('name' => $name, 'start' => $offset, 'startContent' => $offset + strlen($value), 'children' => 0);
             } else {
                 // remove the closed block from `open` stack, collect some info and push it to `close` stack
-                $element = array_pop($open);
+                $element = array_pop($openStack);
                 $element['endContent'] = $offset;
                 $element['end'] = $offset + strlen($value);
-                $element['content'] = substr($template, $element['start'], $element['end'] - $element['start']);
-                $element['contentOnly'] = substr($template, $element['startContent'], $element['endContent'] - $element['startContent']);
-                $element['beginBlock'] = substr($template, $element['start'], $element['startContent'] - $element['start']);
-                $element['endBlock'] = substr($template, $element['endContent'], $element['end'] - $element['endContent']);
+                $element['content'] = $this->sliceString($template, $element['start'], $element['end']);
+                $element['contentOnly'] = $this->sliceString($template, $element['startContent'], $element['endContent']);
+                $element['beginBlock'] = $this->sliceString($template, $element['start'], $element['startContent']);
+                $element['endBlock'] = $this->sliceString($template, $element['endContent'], $element['end']);
 
-                $result[] = $element;
+                $closedStack[] = $element;
             }
         }
 
         // sort by children - the replaccement later will go from the deepest child towards the main parent
-        usort($result, function($a, $b) {
-            $a = $a['children'];
-            $b = $b['children'];
+        usort($closedStack, array($this, 'sortByChildren'));
 
-            if ($a == $b) {
-                return 0;
-            };
+        return $closedStack;
 
-            return $a < $b ? 1 : -1;
+    }
 
-        });
+    /**
+     * Will to a substr() - and automatically takes care of transforming the absolute $end to a relative $length
+     *
+     * @param $string
+     * @param $start
+     * @param $end
+     * @return string
+     */
+    private function sliceString($string, $start, $end)
+    {
+        return substr($string, $start, $end - $start);
+    }
 
-        return $result;
+    private function sortByChildren($a, $b)
+    {
+        $a = $a['children'];
+        $b = $b['children'];
 
+        if ($a == $b) {
+            return 0;
+        };
+
+        return $a < $b ? 1 : -1;
     }
 }

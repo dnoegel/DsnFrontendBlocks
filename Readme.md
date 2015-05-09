@@ -1,5 +1,5 @@
-# DsnFrontendBlocks
-Will show frontend blocks as HTML comments in the page's source code.
+# DsnFrontendBlocks (for shopware)
+Plugin for shopware that will show frontend smarty blocks as HTML comments in the page's source code.
 
 # Setting it up
 * Install the plugin
