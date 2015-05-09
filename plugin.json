@@ -1,0 +1,28 @@
+{
+    "label": {
+        "de": "DsnFrontendBlocks",
+        "en": "DsnFrontendBlocks"
+    },
+    "copyright": "",
+    "license": "MIT",
+    "link": "",
+    "author": "Daniel Nögel",
+
+    "currentVersion": "1.0.0",
+
+    "changelog": {
+        "de": {
+            "1.0.0": "Erstveröffentlichung"
+        },
+        "en": {
+            "1.0.0": "First release"
+        }
+    },
+
+    "compatibility": {
+        "minimumVersion": "4.3.0",
+        "maximumVersion": null,
+        "blacklist": [
+        ]
+    }
+}
