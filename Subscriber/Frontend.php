@@ -66,7 +66,7 @@ class Frontend implements \Enlight\Event\SubscriberInterface
     private function reconfigureTemplateDirs(\Enlight_Template_Manager $templateManager)
     {
         $compileDir = $templateManager->getCompileDir() . 'blocks/';
-        $cacheDir = $templateManager->getTemplateDir() . 'blocks/';
+        $cacheDir = $templateManager->getCacheDir() . 'blocks/';
 
         $templateManager->setCompileDir($compileDir);
         $templateManager->setCacheDir($cacheDir);
